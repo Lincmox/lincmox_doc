@@ -1,0 +1,33 @@
+{
+  "name": "Lincmox Documentation v2.0",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": [
+    "--env-file",
+    "${localWorkspaceFolder}/.env",
+    "--name",
+    "lincmox-doc-dev-container"
+  ],
+  "mounts": [
+    "source=openchamber-config,target=/home/vscode/.config/openchamber,type=volume",
+    "source=opencode-config,target=/home/vscode/.config/opencode,type=volume",
+    "source=opencode-share,target=/home/vscode/.local/share/opencode,type=volume"
+  ],
+  // "postStartCommand": "opencode upgrade",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "mhutchie.git-graph",
+        "sst-dev.opencode",
+        "FedaykinDev.openchamber",
+        "golang.go"
+      ],
+      "settings": {
+        // "workbench.editorAssociations": {
+        //   "*.md": "vscode.markdown.preview.editor"
+        // }
+      }
+    }
+  }
+}

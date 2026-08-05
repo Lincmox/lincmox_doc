@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "nvidia": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "NVIDIA NIM",
+      "options": {
+        "baseURL": "https://integrate.api.nvidia.com/v1",
+        "timeout": 600000,
+        "chunkTimeout": 60000
+      }
+    }
+  },
+  "model": "opencode/mimo-v2.5-free"
+}
