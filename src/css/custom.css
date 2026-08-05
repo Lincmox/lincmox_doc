@@ -64,3 +64,23 @@
 [data-theme='dark'] .footer {
   background-color: #e57c24;
 }
+
+@media (min-width: 996px) {
+  .main-wrapper {
+    padding: 0;
+  }
+
+  .homepage aside[class*="sidebar"] {
+    display: none;
+  }
+
+  .homepage article[class*="docSidebarContainer"] {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .homepage article[class*="docSidebarContainer"] header {
+    display: none;
+  }
+}

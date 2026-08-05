@@ -33,6 +33,30 @@ const config = {
     ],
   ],
 
+  themes: [
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+        searchBarPosition: "right",
+      },
+    ],
+  ],
+
+  plugins: [
+    [
+      'docusaurus-plugin-zooming',
+      {
+        selector: '.markdown img',
+        delay: 500,
+        background: {
+          light: 'rgba(255, 255, 255, 0.9)',
+          dark: 'rgba(30, 30, 30, 0.9)',
+        },
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -64,30 +88,7 @@ const config = {
       },
       footer: {
         style: 'dark',
-        links: [
-          {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Introduction',
-                to: '/docs/',
-              },
-              {
-                label: 'Installation',
-                to: '/docs/get-started/installation',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/Lincmox',
-              },
-            ],
-          },
-        ],
+        links: [],
         copyright: `Copyright ${new Date().getFullYear()} Lincmox. Built with Docusaurus.`,
       },
     }),
