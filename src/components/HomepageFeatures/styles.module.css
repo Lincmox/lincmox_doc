@@ -1,0 +1,35 @@
+.features {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+}
+
+.featureCard {
+  display: block;
+  padding: 1.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.featureCard:hover {
+  border-color: #fb8a28;
+  box-shadow: 0 4px 12px rgba(251, 138, 40, 0.15);
+  text-decoration: none;
+  color: inherit;
+}
+
+[data-theme='dark'] .featureCard {
+  background: #1d1d1d;
+  border-color: #374151;
+}
+
+[data-theme='dark'] .featureCard:hover {
+  border-color: #f9941c;
+  box-shadow: 0 4px 12px rgba(249, 148, 28, 0.2);
+}
