@@ -54,14 +54,37 @@ Then open [http://localhost:8080](http://localhost:8080).
 ## CI/CD — Docker deployment
 
 The Docker image is built and pushed automatically by **Gitea Actions**
-(`.gitea/workflows/docker.yml`).
+(`.gitea/workflows/docker.yml`). No build step is required for the site itself
+(the Markdown content is rendered client-side), the pipeline only packages the
+static site into an nginx image and publishes it.
 
 ### Workflow triggers
 
-| Event | Image tags |
-|---|---|
-| push on `develop` | `nightly` |
-| tag push (e.g. `v2.0.0`) | `latest` + `v2.0.0` |
+| Event | Image version tag | `latest` also pushed? |
+|---|---|---|
+| push on `develop` | `nightly` | no |
+| tag push — **any tag** (e.g. `v2.0.0`, `1.2.3`, `2026.09`) | the tag name, without any `v` prefix stripping | yes |
+
+> Tags are used verbatim as the image version. There is **no `v` prefix requirement**:
+> `v2.0.0` → tag `v2.0.0`; `1.2.3` → tag `1.2.3`. Pushing a tag always also pushes a
+> `latest` tag; pushing to `develop` only pushes `nightly`.
+
+### What the workflow does
+
+1. **Checkout** the repository.
+2. **Calculate the image version** (`id: tag`): if the ref is a tag,
+   `version=<tag name>` and `is_tag=true`; otherwise `version=nightly` and `is_tag=false`.
+3. **Build the image name** (`id: image`): Gitea registry image is built from
+   `${{ vars.REGISTRY_DOMAIN }}/${{ gitea.repository_owner }}/documentation`
+   (lowercased), GHCR image is `ghcr.io/lincmox/documentation`.
+4. **Assemble the tags** (`id: imagetags`):
+   - tag push → `<image>:<tag>` + `:latest` on both registries.
+   - develop push → only `<image>:nightly`.
+5. **Set up QEMU + Docker Buildx** for multi-architecture builds.
+6. **Login** to the Gitea Container Registry (actor + `ACCESS_TOKEN`) and to
+   GitHub Container Registry (`GHCR_USERNAME` + `GHCR_TOKEN`).
+7. **Build and push** with `docker/build-push-action@v6`, multi-platform
+   (`linux/amd64`, `linux/arm64`), tags from step 4.
 
 ### Output
 
@@ -69,11 +92,34 @@ A multi-architecture image (`linux/amd64`, `linux/arm64`) is pushed to **two reg
 
 | Registry | Image |
 |---|---|
-| Gitea Container Registry | `${{ vars.REGISTRY_DOMAIN }}/lincmox/documentation:<tag>` |
+| Gitea Container Registry | `${{ vars.REGISTRY_DOMAIN }}/<owner>/documentation:<tag>` |
 | GitHub Container Registry (GHCR) | `ghcr.io/lincmox/documentation:<tag>` |
 
-Both pushes use the same tags (`nightly` on develop, `latest` + version on tag), so the
+Both pushes use the same tags (`nightly` on `develop`, `latest` + version on tag), so the
 documentation can be pulled from either registry.
+
+### Required variables & secrets
+
+| Kind | Name | Purpose |
+|---|---|---|
+| Variable | `REGISTRY_DOMAIN` | Gitea registry domain used to compose the Gitea image name |
+| Secret | `ACCESS_TOKEN` | Gitea access token for the Gitea registry login |
+| Secret | `GHCR_USERNAME` | GitHub user/organization for `ghcr.io` |
+| Secret | `GHCR_TOKEN` | GitHub token (write:packages) for `ghcr.io` |
+
+### How the image is built (`Dockerfile`)
+
+```dockerfile
+FROM nginx:alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf     # SPA + caching + security headers
+COPY index.html /usr/share/nginx/html/
+COPY config.json /usr/share/nginx/html/
+COPY assets/ /usr/share/nginx/html/assets/
+COPY doc/ /usr/share/nginx/html/doc/
+EXPOSE 80
+```
+
+The static site (HTML shell + assets + Markdown `doc/`) is served by nginx on port 80.
 
 ### Deploying the docs
 
@@ -83,7 +129,7 @@ docker pull ghcr.io/lincmox/documentation:latest
 docker run -p 8080:80 ghcr.io/lincmox/documentation
 
 # Or from the Gitea registry
-docker pull <REGISTRY_DOMAIN>/lincmox/documentation:latest
+docker pull <REGISTRY_DOMAIN>/<owner>/documentation:latest
 ```
 
 To deploy with the bundled compose file:
@@ -91,6 +137,9 @@ To deploy with the bundled compose file:
 ```bash
 docker compose up -d
 ```
+
+> Note: `docker-compose.yml` pins a local `lincmox/docs:0.1.1` build for development;
+> for production it is generally replaced by pulling the `latest` image from a registry.
 
 ## Editing content
 
