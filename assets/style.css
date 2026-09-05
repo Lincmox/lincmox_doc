@@ -311,6 +311,15 @@ a:hover { text-decoration: underline; }
   margin-right: 0;
 }
 
+/* Logo integration (dynamic transparent PNGs) */
+.landing .doc-body img[alt="Lincmox logo"] {
+  content: url("logo_light.png");
+  max-width: 100%;
+}
+[data-theme="dark"] .landing .doc-body img[alt="Lincmox logo"] {
+  content: url("logo_dark.png");
+}
+
 /* Glassmorphism card for landing page content */
 .landing .doc-body {
   background: rgba(255, 255, 255, 0.25);
