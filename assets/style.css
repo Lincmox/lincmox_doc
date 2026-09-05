@@ -104,6 +104,7 @@ a:hover { text-decoration: underline; }
 .version-badge {
   display: inline-flex;
   align-items: center;
+  height: 34px;
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 999px;
@@ -113,16 +114,22 @@ a:hover { text-decoration: underline; }
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
 .version-badge:hover { text-decoration: none; }
+.version-badge-label,
+.version-badge-value {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
 .version-badge-label {
   color: rgba(255, 255, 255, 0.85);
   background: rgba(0, 0, 0, 0.22);
-  padding: 0.18rem 0.55rem;
+  padding: 0 0.55rem;
   letter-spacing: 0.03em;
 }
 .version-badge-value {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.16);
-  padding: 0.18rem 0.6rem;
+  padding: 0 0.6rem;
   letter-spacing: 0.02em;
 }
 
