@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LincMox — Contrôle LED</title>
+    <style>
+        /* =========================================================
+           DESIGN TOKENS — shadcn/ui style (HSL), orange brand
+           ========================================================= */
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 240 10% 3.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 240 10% 3.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 240 10% 3.9%;
+            --primary: 30 96% 45%;
+            --primary-foreground: 0 0% 100%;
+            --secondary: 240 4.8% 95.9%;
+            --secondary-foreground: 240 5.9% 10%;
+            --muted: 240 4.8% 95.9%;
+            --muted-foreground: 240 3.8% 46.1%;
+            --accent: 30 96% 45%;
+            --accent-foreground: 0 0% 100%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 0 0% 98%;
+            --success: 142 71% 45%;
+            --success-foreground: 0 0% 98%;
+            --border: 240 5.9% 90%;
+            --input: 240 5.9% 90%;
+            --ring: 30 96% 45%;
+            --radius: 0.5rem;
+            --header-height: 60px;
+            --transition: 0.15s ease;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        }
+
+        [data-theme="dark"] {
+            --background: 240 10% 3.9%;
+            --foreground: 0 0% 98%;
+            --card: 240 10% 3.9%;
+            --card-foreground: 0 0% 98%;
+            --popover: 240 10% 3.9%;
+            --popover-foreground: 0 0% 98%;
+            --primary: 31 87% 53%;
+            --primary-foreground: 0 0% 100%;
+            --secondary: 240 3.7% 15.9%;
+            --secondary-foreground: 0 0% 98%;
+            --muted: 240 3.7% 15.9%;
+            --muted-foreground: 240 5% 64.9%;
+            --accent: 31 87% 53%;
+            --accent-foreground: 0 0% 100%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 0 0% 98%;
+            --success: 142 63% 31%;
+            --success-foreground: 0 0% 98%;
+            --border: 240 3.7% 15.9%;
+            --input: 240 3.7% 15.9%;
+            --ring: 31 87% 53%;
+        }
+
+        /* =========================================================
+           BASE
+           ========================================================= */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.6;
+            color: hsl(var(--foreground));
+            background: hsl(var(--background));
+            -webkit-font-smoothing: antialiased;
+            transition: background var(--transition), color var(--transition);
+            min-height: 100vh;
+        }
+
+        .text-muted { color: hsl(var(--muted-foreground)); }
+
+        /* =========================================================
+           HEADER
+           ========================================================= */
+        .site-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: hsl(var(--background) / 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid hsl(var(--border));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0 1.5rem;
+            z-index: 100;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            min-width: 0;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: hsl(var(--foreground));
+            white-space: nowrap;
+        }
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius);
+            background: hsl(var(--primary) / 0.12);
+            color: hsl(var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .brand-logo svg { width: 16px; height: 16px; }
+        .brand-info { display: flex; flex-direction: column; line-height: 1.2; }
+        .brand-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        .brand-subtitle {
+            font-size: 0.68rem;
+            font-weight: 400;
+            color: hsl(var(--muted-foreground));
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .conn-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            white-space: nowrap;
+        }
+        .conn-pill .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: hsl(var(--muted-foreground));
+            display: inline-block;
+        }
+        .conn-pill .dot.ok { background: hsl(var(--success)); box-shadow: 0 0 6px hsl(var(--success) / 0.6); }
+        .conn-pill .dot.err { background: hsl(var(--destructive)); box-shadow: 0 0 6px hsl(var(--destructive) / 0.6); }
+
+        .theme-toggle {
+            width: 2.25rem;
+            height: 2.25rem;
+            padding: 0;
+        }
+        .theme-toggle svg { width: 16px; height: 16px; }
+        [data-theme="light"] .icon-sun  { display: none; }
+        [data-theme="dark"]  .icon-moon { display: none; }
+
+        /* =========================================================
+           BUTTON (shadcn/ui)
+           ========================================================= */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            height: 2.25rem;
+            padding: 0 1rem;
+            border-radius: calc(var(--radius) - 2px);
+            border: 1px solid transparent;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background-color var(--transition), color var(--transition),
+                        border-color var(--transition), box-shadow var(--transition), opacity var(--transition);
+        }
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+        }
+        .btn:disabled { opacity: 0.5; pointer-events: none; }
+
+        .btn-default { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+        .btn-default:hover { background: hsl(var(--primary) / 0.9); }
+
+        .btn-outline { background: hsl(var(--background)); border-color: hsl(var(--input)); color: hsl(var(--foreground)); }
+        .btn-outline:hover { background: hsl(var(--accent) / 0.1); color: hsl(var(--accent)); }
+
+        .btn-ghost { background: transparent; color: hsl(var(--foreground)); }
+        .btn-ghost:hover { background: hsl(var(--accent) / 0.1); color: hsl(var(--accent)); }
+
+        .btn-success { background: hsl(var(--success)); color: hsl(var(--success-foreground)); }
+        .btn-success:hover { background: hsl(var(--success) / 0.9); }
+
+        .btn-destructive { background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); }
+        .btn-destructive:hover { background: hsl(var(--destructive) / 0.9); }
+
+        .btn-sm { height: 2rem; padding: 0 0.75rem; font-size: 0.78rem; }
+        .btn-flex { flex: 1; }
+
+        /* =========================================================
+           BADGE (shadcn/ui)
+           ========================================================= */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            padding: 0.125rem 0.625rem;
+            font-size: 0.72rem;
+            font-weight: 500;
+            line-height: 1.5;
+            white-space: nowrap;
+            transition: background var(--transition), color var(--transition), border-color var(--transition);
+        }
+        .badge-outline { border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+        .badge-secondary { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+        .badge-success { background: hsl(var(--success)); color: hsl(var(--success-foreground)); }
+        .badge-destructive { background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); }
+
+        /* =========================================================
+           CARD (shadcn/ui)
+           ========================================================= */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: calc(var(--radius) - 2px);
+            padding: 1.25rem;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            margin-bottom: 1rem;
+        }
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: hsl(var(--card-foreground));
+        }
+        .card-title svg { width: 16px; height: 16px; color: hsl(var(--muted-foreground)); flex-shrink: 0; }
+        .card-description { font-size: 0.8rem; color: hsl(var(--muted-foreground)); }
+
+        .card-wide { grid-column: 1 / -1; }
+
+        .placeholder { color: hsl(var(--muted-foreground)); font-size: 0.85rem; text-align: center; padding: 20px 0; }
+
+        /* =========================================================
+           INPUT / SELECT / LABEL (shadcn/ui)
+           ========================================================= */
+        .label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+            flex-shrink: 0;
+        }
+
+        .input {
+            display: block;
+            height: 2.25rem;
+            width: 100%;
+            border-radius: calc(var(--radius) - 2px);
+            border: 1px solid hsl(var(--input));
+            background: transparent;
+            padding: 0 0.75rem;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            color: hsl(var(--foreground));
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .input::placeholder { color: hsl(var(--muted-foreground)); }
+        .input:focus-visible {
+            outline: none;
+            border-color: hsl(var(--ring));
+            box-shadow: 0 0 0 1px hsl(var(--ring));
+        }
+
+        select.input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1rem;
+            padding-right: 2rem;
+        }
+
+        input[type="range"] { accent-color: hsl(var(--primary)); flex: 1; min-width: 120px; height: 1.25rem; }
+
+        input[type="color"].color-input {
+            width: 42px;
+            height: 32px;
+            padding: 1px;
+            border-radius: 6px;
+            border: 1px solid hsl(var(--input));
+            background: hsl(var(--background));
+            cursor: pointer;
+        }
+
+        .value-badge {
+            background: hsl(var(--secondary));
+            border-radius: calc(var(--radius) - 2px);
+            padding: 3px 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: hsl(var(--foreground));
+        }
+
+        .swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 1px solid hsl(var(--border));
+            background: #000;
+            flex-shrink: 0;
+        }
+
+        .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .row + .row { margin-top: 12px; }
+        .spacer { flex: 1; }
+
+        /* =========================================================
+           LED CARDS
+           ========================================================= */
+        .led-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .led-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: calc(var(--radius) - 2px);
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .led-card:hover {
+            border-color: hsl(var(--ring));
+            box-shadow: 0 1px 4px rgb(0 0 0 / 0.06);
+        }
+
+        .led-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: hsl(var(--card-foreground));
+        }
+
+        .led-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+        .led-actions .btn { padding: 0 0.25rem; width: 100%; font-size: 0.75rem; }
+
+        .color-dots { display: flex; gap: 6px; align-items: center; }
+        .color-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow var(--transition);
+        }
+        .color-dot:hover { transform: scale(1.15); }
+        .color-dot.active { border-color: hsl(var(--foreground)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.3); }
+        .color-white { background: #ffffff; border-color: hsl(var(--border)); }
+        .color-red { background: hsl(var(--destructive)); }
+        .color-orange { background: hsl(var(--primary)); }
+
+        
+        /* =========================================================
+           WIREFRAME
+           ========================================================= */
+        .linc-wireframe {
+            display: flex; justify-content: center; padding: 20px 0;
+        }
+        .linc-body {
+            width: 100%; max-width: 600px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.05);
+            display: flex; flex-direction: column;
+            border: 1px solid #000;
+        }
+        [data-theme="light"] .linc-body {
+            background: #2a2a2a; border-color: #222;
+        }
+        .linc-top {
+            height: 70px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 0 30px 15px;
+        }
+        .linc-leds-center { display: flex; gap: 14px; margin-left: 80px; }
+        .linc-leds-right { display: flex; }
+        .wireframe-led-wrapper {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            cursor: pointer; padding: 4px; border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .wireframe-led-wrapper:hover { background: rgba(255,255,255,0.05); }
+        .wireframe-led {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #333; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .wf-label {
+            font-size: 0.55rem; color: #777; font-family: var(--font-mono); font-weight: 600;
+            transition: color 0.2s;
+        }
+        .wireframe-led-wrapper:hover .wf-label { color: hsl(var(--primary)); }
+        
+        .linc-bottom {
+            height: 28px;
+            background: linear-gradient(to bottom, #d4d4d8, #94a3b8);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.4);
+            border-top: 1px solid #111;
+        }
+        [data-theme="dark"] .linc-bottom {
+            background: linear-gradient(to bottom, #52525b, #27272a);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
+        }
+        .wireframe-strip {
+            width: 85%; height: 7px; border-radius: 4px;
+            background: #555;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .wf-active { background: rgba(255,255,255,0.1) !important; outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+        
+        @keyframes blink-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        .wf-blink { animation: blink-anim 1s infinite; }
+        
+        .dynamic-panel { animation: slideIn 0.2s ease-out; }
+        
+        /* Hide old sections just in case */
+        .old-led-strip { display: none; }
+
+        /* =========================================================
+           STATUS PANEL
+           ========================================================= */
+        .status-panel { display: flex; flex-direction: column; }
+        .status-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.85rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+        .status-line:last-child { border-bottom: none; padding-bottom: 0; }
+        .status-line .k { color: hsl(var(--muted-foreground)); flex-shrink: 0; }
+        .status-line .v { color: hsl(var(--foreground)); font-weight: 500; text-align: right; }
+
+        /* =========================================================
+           MONITORS
+           ========================================================= */
+        .monitor-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 0 12px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        /* =========================================================
+           TOAST
+           ========================================================= */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 200;
+        }
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            color: hsl(var(--card-foreground));
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+            animation: slideIn 0.2s;
+            max-width: 340px;
+        }
+        .toast::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: hsl(var(--ring));
+            flex-shrink: 0;
+        }
+        .toast.error::before { background: hsl(var(--destructive)); }
+        .toast.success::before { background: hsl(var(--success)); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* =========================================================
+           SCROLLBAR
+           ========================================================= */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+        
+        .wireframe-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+            min-height: 200px;
+        }
+        .linc-wireframe {
+            flex: 1;
+            min-width: 320px;
+        }
+        @media (max-width: 900px) {
+            .wireframe-container {
+                grid-template-columns: 1fr;
+            }
+            #dynamicControlPanel {
+                border-left: none !important;
+                border-top: 1px solid hsl(var(--border));
+                padding-left: 0 !important;
+                padding-top: 1.25rem;
+                width: 100% !important;
+            }
+        }
+/* =========================================================
+           RESPONSIVE
+           ========================================================= */
+        @media (max-width: 900px) {
+            .card-wide { grid-column: 1 / -1; }
+        }
+        @media (max-width: 600px) {
+            .main-grid { grid-template-columns: 1fr; padding: 16px; }
+            .site-header { padding: 0 0.9rem; }
+            .brand-subtitle { display: none; }
+            .version-badge { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-left">
+            <a class="brand" href="/" title="LincMox">
+                <div class="brand-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-name">LINCMOX</span>
+                    <span class="brand-subtitle">Contrôle LED LincStation N1</span>
+                </div>
+            </a>
+        </div>
+        <div class="header-right">
+            <div class="conn-pill" title="État de la connexion au daemon">
+                <span class="dot" id="statusDot"></span>
+                <span id="statusText">Connexion…</span>
+            </div>
+            <span class="badge badge-outline version-badge" title="API">API v1</span>
+            <button id="theme-toggle" class="btn btn-outline theme-toggle" title="Basculer thème clair/sombre" aria-label="Basculer le thème">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <!-- Wireframe & Contrôles -->
+        <section class="card card-wide">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7 6 8 6 8s6-1 6-8z"/><path d="M10 20h4"/><path d="M12 20v1"/></svg>
+                    Contrôle Interactif
+                </h2>
+                <p class="card-description">Cliquez sur une LED ou sur le bandeau du LincStation pour ajuster ses paramètres.</p>
+            </div>
+
+            <div class="wireframe-container">
+            <div class="linc-wireframe" style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 20px;">
+                <div class="linc-body">
+                    <div class="linc-top">
+                        <div class="linc-leds-center">
+                            <div class="wireframe-led-wrapper wf-target" data-target="sata1"><div class="wireframe-led" id="wf-sata1"></div><span class="wf-label">S1</span></div>
+                            <div class="wireframe-led-wrapper wf-target" data-target="sata2"><div class="wireframe-led" id="wf-sata2"></div><span class="wf-label">S2</span></div>
+                            <div class="wireframe-led-wrapper wf-target" data-target="nvme1"><div class="wireframe-led" id="wf-nvme1"></div><span class="wf-label">N1</span></div>
+                            <div class="wireframe-led-wrapper wf-target" data-target="nvme2"><div class="wireframe-led" id="wf-nvme2"></div><span class="wf-label">N2</span></div>
+                            <div class="wireframe-led-wrapper wf-target" data-target="nvme3"><div class="wireframe-led" id="wf-nvme3"></div><span class="wf-label">N3</span></div>
+                            <div class="wireframe-led-wrapper wf-target" data-target="nvme4"><div class="wireframe-led" id="wf-nvme4"></div><span class="wf-label">N4</span></div>
+                            <div class="wireframe-led-wrapper wf-target" data-target="network"><div class="wireframe-led" id="wf-network"></div><span class="wf-label">NET</span></div>
+                        </div>
+                        <div class="linc-leds-right">
+                            <div class="wireframe-led-wrapper wf-target" data-target="power"><div class="wireframe-led" id="wf-power"></div><span class="wf-label">PWR</span></div>
+                        </div>
+                    </div>
+                    <div class="linc-bottom wf-target" data-target="strip">
+                        <div class="wireframe-strip" id="wf-strip"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dynamicControlPanel" class="dynamic-panel" style="display:none; background: transparent; border-left: 1px solid hsl(var(--border)); padding-left: 1.25rem; width: 320px; flex-shrink: 0; box-sizing: border-box;">
+                <!-- Filled dynamically by JS -->
+            </div>
+            </div>
+        </section>
+
+        <!-- Statut -->
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Statut
+                </h2>
+                <p class="card-description">État du daemon et de la LincStation N1.</p>
+            </div>
+            <div class="status-panel" id="statusPanel">
+                <div class="placeholder">Chargement du statut…</div>
+            </div>
+        </section>
+
+        <!-- Moniteurs -->
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Moniteurs
+                </h2>
+                <p class="card-description">Surveillance réseau avec blink automatique.</p>
+            </div>
+
+            <div class="monitor-item">
+                <div>
+                    <div class="label" style="font-size:0.9rem;">Réseau</div>
+                    <div class="text-muted" style="font-size:0.78rem;">Blink quand le trafic dépasse le seuil</div>
+                </div>
+                <span class="badge badge-secondary m-status" id="netMonitorStatus">Arrêté</span>
+            </div>
+
+            <div class="row">
+                <span class="label">Interface</span>
+                <input type="text" id="netIface" class="input" value="eth0" style="flex:1;">
+            </div>
+            <div class="row">
+                <span class="label">Intervalle (ms)</span>
+                <input type="number" id="netInterval" class="input" value="500" min="50" style="flex:1;">
+            </div>
+            <div class="row">
+                <span class="label">Seuil (octets)</span>
+                <input type="number" id="netThreshold" class="input" value="1024" min="0" style="flex:1;">
+            </div>
+            <div class="row">
+                <button id="btnNetEnable" class="btn btn-success">Démarrer</button>
+                <button id="btnNetDisable" class="btn btn-ghost">Arrêter</button>
+            </div>
+        </section>
+
+        <!-- Réinitialisation -->
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    Réinitialisation
+                </h2>
+                <p class="card-description">Restaure les LEDs et/ou le bandeau à leur état d'origine.</p>
+            </div>
+            <div class="row">
+                <button id="btnResetLeds" class="btn btn-outline btn-flex">LEDs seulement</button>
+                <button id="btnResetStrip" class="btn btn-outline btn-flex">Strip seulement</button>
+            </div>
+            <div class="row">
+                <button id="btnResetFull" class="btn btn-destructive btn-flex">Réinitialisation complète</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast-container" id="toasts"></div>
+
+    <script>
+        const API = window.location.origin;
+
+        // ---------- Theme (shared with the docs site) ----------
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        
+        // Listen to parent theme changes
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.theme) setTheme(e.data.theme);
+        });
+        
+        // Initial sync
+        try {
+            if (window.parent && window.parent.document) {
+                const parentTheme = window.parent.document.documentElement.getAttribute('data-theme');
+                if (parentTheme) setTheme(parentTheme);
+            }
+        } catch(e) {}
+
+        const LEDS = [
+            { id: 'power',   path: 'power',   name: 'Power' },
+            { id: 'sata1',   path: 'sata/1',  name: 'SATA 1' },
+            { id: 'sata2',   path: 'sata/2',  name: 'SATA 2' },
+            { id: 'nvme1',   path: 'nvme/1',  name: 'NVMe 1' },
+            { id: 'nvme2',   path: 'nvme/2',  name: 'NVMe 2' },
+            { id: 'nvme3',   path: 'nvme/3',  name: 'NVMe 3' },
+            { id: 'nvme4',   path: 'nvme/4',  name: 'NVMe 4' },
+            { id: 'network', path: 'network', name: 'Network' },
+        ];
+
+        const COLORS = [
+            { id: 'white',  label: 'Blanc',   cls: 'color-white'  },
+            { id: 'red',    label: 'Rouge',   cls: 'color-red'    },
+            { id: 'orange', label: 'Orange',  cls: 'color-orange' },
+        ];
+
+        let selectedColors = {};
+        LEDS.forEach(l => selectedColors[l.id] = 'white');
+
+        // ---------- Helpers ----------
+        function $ (id) { return document.getElementById(id); }
+
+        async function api(path, options = {}) {
+            console.log("Mock API call:", path, options);
+            await new Promise(r => setTimeout(r, 100)); // Simulate latency
+            
+            if (path === '/api/v1/state' && !options.method) {
+                return {
+                    daemon_running: true,
+                    leds: {
+                        power: currentState.power,
+                        "sata/1": currentState.sata1,
+                        "sata/2": currentState.sata2,
+                        "nvme/1": currentState.nvme1,
+                        "nvme/2": currentState.nvme2,
+                        "nvme/3": currentState.nvme3,
+                        "nvme/4": currentState.nvme4,
+                        network: currentState.network
+                    },
+                    strip: currentState.strip,
+                    monitors: {
+                        network: {
+                            enabled: true,
+                            interface: "eth0",
+                            interval_ms: 500,
+                            threshold_bytes: 1024
+                        }
+                    }
+                };
+            }
+            
+            if (options.method === 'POST') {
+                if (path.startsWith('/api/v1/led/')) {
+                    const ledId = path.split('/api/v1/led/')[1];
+                    const data = JSON.parse(options.body);
+                    // Map path back to state key
+                    const keyMap = { "power":"power", "sata/1":"sata1", "sata/2":"sata2", "nvme/1":"nvme1", "nvme/2":"nvme2", "nvme/3":"nvme3", "nvme/4":"nvme4", "network":"network" };
+                    const key = keyMap[ledId];
+                    if (key && currentState[key]) {
+                        if (data.color) currentState[key].color = data.color;
+                        if (data.state) currentState[key].state = data.state;
+                    }
+                    return { success: true };
+                }
+                if (path === '/api/v1/strip') {
+                    const data = JSON.parse(options.body);
+                    if (data.anim) currentState.strip.anim = data.anim;
+                    if (data.color) currentState.strip.color = data.color;
+                    if (data.brightness !== undefined) currentState.strip.brightness = data.brightness;
+                    return { success: true };
+                }
+            }
+            
+            return { success: true };
+        }
+
+        function toast(msg, type = '') {
+            const el = document.createElement('div');
+            el.className = 'toast ' + type;
+            el.textContent = msg;
+            $('toasts').appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        // ---------- Wireframe & Control ----------
+
+        let currentState = {
+            power: { color: 'white', state: 'off' },
+            sata1: { color: 'white', state: 'off' },
+            sata2: { color: 'white', state: 'off' },
+            nvme1: { color: 'white', state: 'off' },
+            nvme2: { color: 'white', state: 'off' },
+            nvme3: { color: 'white', state: 'off' },
+            nvme4: { color: 'white', state: 'off' },
+            network: { color: 'white', state: 'off' },
+            strip: { color: '#ff0000', anim: 'off', brightness: 128, loop1: '#00ff00', loop2: '#0000ff' }
+        };
+
+        function updateWireframe() {
+            LEDS.forEach(l => {
+                const el = $('wf-' + l.id);
+                if (!el) return;
+                const s = currentState[l.id];
+                el.className = 'wireframe-led'; 
+                if (s.state === 'on' || s.state === 'blink') {
+                    const c = s.color === 'white' ? '#fff' : s.color === 'red' ? '#ef4444' : '#f97316';
+                    el.style.background = c;
+                    el.style.boxShadow = `0 0 8px ${c}`;
+                    if (s.state === 'blink') el.classList.add('wf-blink');
+                } else {
+                    el.style.background = '#333';
+                    el.style.boxShadow = 'inset 0 1px 2px rgba(0,0,0,0.8)';
+                }
+            });
+            const strip = currentState.strip;
+            const sel = $('wf-strip');
+            if (sel) {
+                sel.className = 'wireframe-strip';
+                if (strip.anim !== 'off') {
+                    sel.style.background = strip.color;
+                    sel.style.boxShadow = `0 0 10px ${strip.color}`;
+                    if (strip.anim === 'breath' || strip.anim === 'loop') sel.classList.add('wf-blink');
+                } else {
+                    sel.style.background = '#555';
+                    sel.style.boxShadow = 'none';
+                }
+            }
+        }
+
+        let activeTarget = null;
+
+        document.querySelectorAll('.wf-target').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.wf-target').forEach(w => w.classList.remove('wf-active'));
+                el.classList.add('wf-active');
+                activeTarget = el.dataset.target;
+                renderControlPanel();
+            });
+        });
+
+        function renderControlPanel() {
+            const panel = $('dynamicControlPanel');
+            if (!activeTarget) { panel.style.display = 'none'; return; }
+            panel.style.display = 'block';
+            
+            if (activeTarget === 'strip') {
+                panel.innerHTML = `
+                    <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: hsl(var(--foreground));">Bandeau LED (Strip)</h3>
+                    <div class="row">
+                        <span class="label">Animation</span>
+                        <select id="stripAnim" class="input" style="flex:1;">
+                            <option value="off" ${currentState.strip.anim === 'off' ? 'selected' : ''}>Off</option>
+                            <option value="breath" ${currentState.strip.anim === 'breath' ? 'selected' : ''}>Breath (respiration)</option>
+                            <option value="loop" ${currentState.strip.anim === 'loop' ? 'selected' : ''}>Loop (boucle)</option>
+                        </select>
+                        <button id="btnAnim" class="btn btn-default">Appliquer</button>
+                    </div>
+                    <div class="row">
+                        <span class="label">Luminosité</span>
+                        <span class="value-badge" id="brightnessVal">${currentState.strip.brightness}</span>
+                        <input type="range" id="stripBrightness" min="0" max="255" value="${currentState.strip.brightness}">
+                    </div>
+                    <div class="row">
+                        <span class="label">Couleur unie</span>
+                        <div class="swatch" id="colorSwatch" style="background:${currentState.strip.color}"></div>
+                        <input type="color" id="stripColor" class="color-input" value="${currentState.strip.color}">
+                    </div>
+                    <div class="row">
+                        <span class="label">Couleur Loop 1</span>
+                        <input type="color" id="loop1Color" class="color-input" value="${currentState.strip.loop1}">
+                    </div>
+                    <div class="row">
+                        <span class="label">Couleur Loop 2</span>
+                        <input type="color" id="loop2Color" class="color-input" value="${currentState.strip.loop2}">
+                    </div>
+                    <div class="row" style="margin-top: 16px;">
+                        <button id="btnStripApply" class="btn btn-success">Appliquer Bandeau</button>
+                        <button id="btnStripReset" class="btn btn-ghost" style="margin-left:auto;">Réinitialiser Strip</button>
+                    </div>
+                `;
+                
+                function hexToRgb(hex) {
+                    const n = parseInt(hex.slice(1), 16);
+                    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+                }
+
+                $('stripColor').addEventListener('input', () => $('colorSwatch').style.background = $('stripColor').value);
+                $('stripBrightness').addEventListener('input', () => $('brightnessVal').textContent = $('stripBrightness').value);
+                
+                $('btnAnim').addEventListener('click', async () => {
+                    const anim = $('stripAnim').value;
+                    try {
+                        await api('/api/v1/strip/animation', { method: 'POST', body: { mode: anim } });
+                        currentState.strip.anim = anim;
+                        updateWireframe();
+                        toast('Animation appliquée', 'success');
+                    } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+                });
+
+                $('btnStripApply').addEventListener('click', async () => {
+                    try {
+                        const col = $('stripColor').value;
+                        const loop1 = $('loop1Color').value;
+                        const loop2 = $('loop2Color').value;
+                        const br = parseInt($('stripBrightness').value);
+                        
+                        await api('/api/v1/strip/color', { method: 'POST', body: hexToRgb(col) });
+                        await api('/api/v1/strip/loop/1/color', { method: 'POST', body: hexToRgb(loop1) });
+                        await api('/api/v1/strip/loop/2/color', { method: 'POST', body: hexToRgb(loop2) });
+                        await api('/api/v1/strip/brightness', { method: 'POST', body: { value: br } });
+                        
+                        currentState.strip.color = col;
+                        currentState.strip.loop1 = loop1;
+                        currentState.strip.loop2 = loop2;
+                        currentState.strip.brightness = br;
+                        // For display, if it's not off, it will show the color
+                        if (currentState.strip.anim === 'off') currentState.strip.anim = 'breath'; // auto-on
+                        updateWireframe();
+                        toast('Strip appliqué', 'success');
+                    } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+                });
+
+                $('btnStripReset').addEventListener('click', async () => {
+                    try {
+                        await api('/api/v1/reset', { method: 'POST', body: { mode: 'strip' } });
+                        toast('Strip réinitialisé', 'success');
+                    } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+                });
+                
+            } else {
+                const led = LEDS.find(l => l.id === activeTarget);
+                panel.innerHTML = `
+                    <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: hsl(var(--foreground));">LED : ${led.name}</h3>
+                    <div class="color-dots" style="margin-bottom: 16px;">
+                        ${COLORS.map(c => `<span class="color-dot ${c.cls} ${currentState[led.id].color === c.id ? 'active' : ''}" data-color="${c.id}" title="${c.label}"></span>`).join('')}
+                    </div>
+                    <div class="led-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                        <button class="btn btn-outline btn-sm dyn-action" data-action="on">On</button>
+                        <button class="btn btn-outline btn-sm dyn-action" data-action="off">Off</button>
+                        <button class="btn btn-outline btn-sm dyn-action" data-action="blink">Blink</button>
+                        <button class="btn btn-outline btn-sm dyn-action" data-action="unblink">Stop Blink</button>
+                    </div>
+                `;
+                
+                panel.querySelectorAll('.color-dot').forEach(dot => {
+                    dot.addEventListener('click', () => {
+                        currentState[led.id].color = dot.dataset.color;
+                        panel.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+                        dot.classList.add('active');
+                        // Update visual preview immediately
+                        updateWireframe();
+                    });
+                });
+                
+                panel.querySelectorAll('.dyn-action').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const action = btn.dataset.action;
+                        const color = currentState[led.id].color;
+                        btn.disabled = true;
+                        try {
+                            if (action === 'blink') {
+                                await api(`/api/v1/led/${led.path}/blink`, { method: 'POST', body: { blink: true } });
+                                currentState[led.id].state = 'blink';
+                            } else if (action === 'unblink') {
+                                await api(`/api/v1/led/${led.path}/blink`, { method: 'POST', body: { blink: false } });
+                                currentState[led.id].state = 'on'; // usually unblink leaves it on
+                            } else {
+                                await api(`/api/v1/led/${led.path}/${action}`, { method: 'POST', body: { color } });
+                                currentState[led.id].state = action;
+                            }
+                            updateWireframe();
+                            const actionMsg = action === 'on' ? 'allumée' : action === 'off' ? 'éteinte' : action === 'blink' ? 'clignotement' : 'arrêt clignotement';
+                            toast(`${led.name}: ${actionMsg}`, 'success');
+                        } catch (e) {
+                            toast(`Erreur ${led.name}: ${e.message}`, 'error');
+                        } finally {
+                            btn.disabled = false;
+                        }
+                    });
+                });
+            }
+        }
+        
+        
+        async function initWireframeState() {
+            try {
+                const res = await api('/api/v1/state');
+                if (res && res.leds && res.strip) {
+                    currentState = { ...res.leds, strip: res.strip };
+                }
+            } catch (e) {
+                console.error("Erreur chargement etat:", e);
+            }
+            updateWireframe();
+            if (activeTarget) renderControlPanel();
+        }
+        initWireframeState();
+
+
+
+        // ---------- Monitors ----------
+        async function refreshMonitors() {
+            try {
+                const data = await api('/api/v1/monitors');
+                const running = (data && data.running) || [];
+                const netRunning = running.includes('network');
+                const el = $('netMonitorStatus');
+                el.textContent = netRunning ? 'Actif' : 'Arrêté';
+                el.className = 'badge m-status ' + (netRunning ? 'badge-success' : 'badge-secondary');
+            } catch (e) { /* ignore */ }
+        }
+
+        $('btnNetEnable').addEventListener('click', async () => {
+            try {
+                await api('/api/v1/monitors/network/enable', { method: 'POST', body: {
+                    iface: $('netIface').value || 'eth0',
+                    interval_ms: parseInt($('netInterval').value) || 500,
+                    threshold_bytes: parseInt($('netThreshold').value) || 1024,
+                }});
+                toast('Moniteur réseau démarré', 'success');
+                refreshMonitors();
+            } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+        });
+
+        $('btnNetDisable').addEventListener('click', async () => {
+            try {
+                await api('/api/v1/monitors/network/disable', { method: 'POST' });
+                toast('Moniteur réseau arrêté', 'success');
+                refreshMonitors();
+            } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+        });
+
+        // ---------- Resets ----------
+        $('btnResetLeds').addEventListener('click', async () => {
+            await doReset('leds');
+        });
+        $('btnResetStrip').addEventListener('click', async () => {
+            await doReset('strip');
+        });
+        $('btnResetFull').addEventListener('click', async () => {
+            await doReset('full');
+        });
+
+        async function doReset(mode) {
+            try {
+                await api('/api/v1/reset', { method: 'POST', body: { mode } });
+                toast('Réinitialisation (' + mode + ') effectuée', 'success');
+            } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+        }
+
+        // ---------- Status ----------
+        async function refreshStatus() {
+            try {
+                const data = await api('/api/v1/status');
+                $('statusDot').className = 'dot ok';
+                $('statusText').textContent = 'Connecté';
+                const panel = $('statusPanel');
+                panel.innerHTML = `
+                    <div class="status-line"><span class="k">Statut</span><span class="v">${data.status}</span></div>
+                    <div class="status-line"><span class="k">Appareil</span><span class="v">${data.device}</span></div>
+                    <div class="status-line"><span class="k">Moniteurs actifs</span><span class="v">${(data.monitors && data.monitors.running) ? data.monitors.running.join(', ') || 'aucun' : 'aucun'}</span></div>
+                `;
+                return data;
+            } catch (e) {
+                $('statusDot').className = 'dot err';
+                $('statusText').textContent = 'Déconnecté';
+                $('statusPanel').innerHTML = `<div class="placeholder">Impossible de joindre l'API : ${e.message}</div>`;
+                return null;
+            }
+        }
+
+        // ---------- Init ----------
+        
+        refreshStatus();
+        refreshMonitors();
+        setInterval(refreshStatus, 5000);
+        setInterval(refreshMonitors, 5000);
+    </script>
+</body>
+</html>

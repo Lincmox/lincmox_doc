@@ -106,6 +106,14 @@ function setTheme(theme) {
   if (logo) {
     logo.src = theme === 'dark' ? 'assets/logo-dark.jpg' : 'assets/logo.jpg';
   }
+
+  // Notify iframes (like the interactive demo)
+  document.querySelectorAll('iframe').forEach(iframe => {
+      if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ theme: theme }, '*');
+      }
+  });
+
   // Restart Vanta with the new theme's palette while it is active
   if (vantaEffect) {
     stopVanta();

@@ -7,7 +7,8 @@
         "label": "Overview",
         "items": [
           { "label": "Welcome", "path": "functional/index.md" },
-          { "label": "Getting started", "path": "functional/getting-started.md" }
+          { "label": "Getting started", "path": "functional/getting-started.md" },
+          { "label": "Interactive Demo", "path": "functional/demo.md" }
         ]
       },
       {
