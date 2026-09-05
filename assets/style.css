@@ -258,6 +258,17 @@ a:hover { text-decoration: underline; }
 .search-result-item:last-child { border-bottom: none; }
 .search-result-item:hover { background: var(--color-bg-hover); }
 .search-result-title { font-weight: 600; font-size: 0.875rem; color: var(--color-text); }
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.2; }
+  100% { opacity: 0.6; }
+}
+
+.indexing-indicator {
+  animation: pulse 1.5s infinite;
+}
+
 .search-result-excerpt { font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px; }
 .search-result-match { background: #dbeafe; border-radius: 2px; padding: 0 2px; color: #1e40af; }
 [data-theme="dark"] .search-result-match { background: #1e3a8a; color: #bfdbfe; }

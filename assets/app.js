@@ -334,6 +334,14 @@ function navigateTo(section, path) {
    ============================================= */
 async function loadPage(filePath) {
   const contentEl = document.getElementById('doc-content');
+  
+  // If we are on the landing page and it's already pre-rendered, skip fetch
+  if (filePath === 'doc/home.md' && contentEl.dataset.prerendered === "true") {
+    // Just remove the flag for future navigations so it acts normally
+    contentEl.dataset.prerendered = "false";
+    return;
+  }
+
   contentEl.innerHTML = '<p class="loading-message">Loading...</p>';
   document.getElementById('toc-nav').innerHTML = '';
 
@@ -681,6 +689,9 @@ async function buildSearchIndex() {
   if (searchIndexBuilt || !config) return;
   searchIndex = [];
 
+  const indicator = document.getElementById('indexing-indicator');
+  if (indicator) indicator.style.display = 'inline-block';
+
   const sections = Object.keys(config.nav);
   for (const section of sections) {
     for (const cat of config.nav[section]) {
@@ -704,6 +715,7 @@ async function buildSearchIndex() {
     }
   }
   searchIndexBuilt = true;
+  if (indicator) indicator.style.display = 'none';
 }
 
 /* =============================================

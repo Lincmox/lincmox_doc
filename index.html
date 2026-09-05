@@ -28,7 +28,7 @@
       <a href="#/" class="brand">
         <img id="logo" src="assets/logo.jpg" alt="Logo" class="brand-logo" />
         <div class="brand-info">
-          <span id="site-title" class="brand-name">Lincmox Docs</span>
+          <span id="site-title" class="brand-name">Lincmox</span>
           <span class="brand-subtitle">Documentation</span>
         </div>
       </a>
@@ -41,6 +41,7 @@
       <div class="search-wrapper">
         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="search-input" class="search-input" placeholder="Search..." autocomplete="off" />
+        <span id="indexing-indicator" class="indexing-indicator" style="display: none; position: absolute; right: 10px; top: 10px; font-size: 0.75rem; color: var(--color-primary);">Indexation...</span>
         <div id="search-results" class="search-results" hidden></div>
       </div>
 
@@ -71,8 +72,16 @@
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="main-content">
-      <article id="doc-content" class="doc-body">
-        <p class="loading-message">Loading...</p>
+      <article id="doc-content" class="doc-body" data-prerendered="true">
+        <div align="center">
+          <img src="assets/logo_light.png" alt="Lincmox logo" width="520" />
+          <h1>Welcome to the Lincmox documentation</h1>
+          <p>Find here all the functional and technical documentation of the project.</p>
+          <br/>
+          <a href="#/functional/functional/index.md" style="display: inline-block; padding: 10px 20px; background: var(--color-primary); color: white; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px;">Access the documentation</a>
+        </div>
+        <hr/>
+        <p><strong>Lincmox</strong> is an open-source project that brings full control of the status LEDs and front LED strip of the <a href="https://www.lincplustech.com/fr-fr/products/lincstation-n1-network-attached-storage"><strong>LincPlus LincStation N1</strong></a> when the machine runs <a href="https://www.proxmox.com/en/products/proxmox-virtual-environment/overview"><strong>Proxmox VE</strong></a>.</p>
       </article>
     </main>
 

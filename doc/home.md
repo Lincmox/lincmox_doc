@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../assets/logo_2.jpg" alt="Lincmox logo" width="520" />
+  <img src="assets/logo_2.jpg" alt="Lincmox logo" width="520" />
   <h1>Welcome to the Lincmox documentation</h1>
   <p>Find here all the functional and technical documentation of the project.</p>
   <br/>
