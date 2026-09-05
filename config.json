@@ -1,0 +1,61 @@
+{
+  "title": "Lincmox",
+  "logo": "assets/logo.jpg",
+  "nav": {
+    "functional": [
+      {
+        "label": "Overview",
+        "items": [
+          { "label": "Welcome", "path": "functional/index.md" },
+          { "label": "Getting started", "path": "functional/getting-started.md" }
+        ]
+      },
+      {
+        "label": "User guide",
+        "items": [
+          { "label": "Command line interface", "path": "functional/interface.md" },
+          { "label": "Web UI", "path": "functional/web-ui.md" },
+          { "label": "Automatic monitors", "path": "functional/monitors.md" },
+          { "label": "LincStation N1 hardware", "path": "functional/hardware.md" }
+        ]
+      }
+    ],
+    "technical": [
+      {
+        "label": "Architecture",
+        "items": [
+          { "label": "Technical overview", "path": "technical/index.md" }
+        ]
+      },
+      {
+        "label": "Operations",
+        "items": [
+          { "label": "Installation", "path": "technical/installation.md" },
+          { "label": "Upgrading", "path": "technical/upgrading.md" },
+          { "label": "Simulation mode", "path": "technical/simulation.md" },
+          { "label": "Troubleshooting", "path": "technical/troubleshooting.md" }
+        ]
+      },
+      {
+        "label": "Reference",
+        "items": [
+          { "label": "CLI reference", "path": "technical/cli.md" },
+          { "label": "REST API reference", "path": "technical/api.md" }
+        ]
+      },
+      {
+        "label": "Hardware & protocol",
+        "items": [
+          { "label": "I2C protocol & registers", "path": "technical/i2c-protocol.md" }
+        ]
+      },
+      {
+        "label": "Project",
+        "items": [
+          { "label": "Repositories", "path": "technical/repositories.md" },
+          { "label": "Changelog", "path": "technical/changelog.md" }
+        ]
+      }
+    ]
+  }
+}

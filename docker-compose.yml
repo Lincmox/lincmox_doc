@@ -1,0 +1,7 @@
+services:
+  lincmox-docs:
+    build: .
+    image: lincmox/docs:0.1.1
+    ports:
+      - "8080:80"
+    restart: unless-stopped

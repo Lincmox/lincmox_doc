@@ -1,50 +1,68 @@
-# Lincmox Documentation
+# Lincmox Docs
 
-Documentation officielle du projet [Lincmox](https://doc.lincmox.ovh/) — construite avec [Docusaurus](https://docusaurus.io/).
+Static documentation website for the **Lincmox** project, in a GitBook/Docusaurus-like
+style, built with **vanilla HTML/CSS/JS** — no framework, no build step.
 
-## Prérequis
-
-- Node.js >= 18.0
-- npm ou yarn
-
-## Installation
+## Run the documentation locally
 
 ```bash
-npm install
+python3 -m http.server 8000
 ```
 
-## Développement
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+## Project structure
+
+```
+├── index.html          # Single HTML shell (SPA)
+├── config.json         # Site title, logo and navigation configuration
+├── assets/
+│   ├── app.js          # JS logic (routing, Markdown, search, TOC, theme)
+│   ├── style.css       # Styles (light/dark, layout, Markdown, pagination)
+│   ├── logo.png        # Site logo
+│   └── img/            # Screenshots and figures used by the docs
+├── doc/
+│   ├── home.md         # Landing page (shown on #/)
+│   ├── functional/     # Functional documentation (user guide)
+│   └── technical/      # Technical documentation (reference)
+```
+
+The content lives entirely in **Markdown** files under `doc/`. The navigation is driven
+by `config.json`. There is no build step: the `index.html` shell fetches the Markdown
+files and renders them client-side with `marked.js`.
+
+## Features
+
+- **Landing page** at `#/` (served by `doc/home.md`)
+- **Previous / Next** navigation buttons at the bottom of each page
+- **Full-text search** over all pages
+- **Light / Dark** theme toggle (persisted in `localStorage`)
+- **Auto-generated table of contents**, syntax highlighting (`Prism.js`) and
+  **Mermaid** diagram rendering
+
+## Run with Docker
 
 ```bash
-npm start
+docker compose up -d
+# or
+docker build -t lincmox/docs:0.1.1 .
+docker run -p 8080:80 lincmox/docs
 ```
 
-Le site sera disponible sur `http://localhost:3000`.
+Then open [http://localhost:8080](http://localhost:8080).
 
-## Build
+## Editing content
 
-```bash
-npm run build
-```
+1. Edit or add a Markdown file under `doc/functional/` or `doc/technical/`.
+2. If you added a new page, reference it in `config.json` under the matching
+   `nav.functional` or `nav.technical` category.
 
-Le site statique sera généré dans le dossier `build/`.
+### Writing rules
 
-## Structure
-
-```
-docs/
-├── index.md                  # Page d'accueil
-├── introduction/             # Présentation du projet
-├── get-started/              # Installation & mise à jour
-├── documentation/            # CLI, daemon, GUI, simulation
-├── github/                   # Dépôts GitHub
-└── changelog/                # Changelog des versions
-```
-
-## Déploiement
-
-```bash
-npm run deploy
-```
-
-Voir la [documentation Docusaurus](https://docusaurus.io/docs/deployment) pour les options de déploiement (Vercel, Netlify, GitHub Pages, etc.).
+- All content is written in English.
+- Link between pages with relative Markdown paths, e.g. `[CLI](interface.md)` —
+  the viewer resolves them automatically. Absolute fallbacks `../technical/api.md`
+  also work.
+- Place images under `assets/img/` and reference them as `../assets/img/<name>`.
+- Code blocks can be annotated with a language for syntax highlighting, and the
+  `mermaid` language renders Mermaid diagrams.

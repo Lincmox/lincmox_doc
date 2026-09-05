@@ -1,0 +1,11 @@
+.devcontainer/
+.opencode/
+.git/
+.gitignore
+AGENTS.md
+README.md
+spec.md
+Dockerfile
+docker-compose*.yml
+*.md
+!doc/**/*.md
