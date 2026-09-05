@@ -80,3 +80,23 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.imagetags.outputs.tags }}
+
+  deploy:
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy on server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+            cd /home/ubuntu/docker/lincmox
+
+            docker compose pull
+            docker compose up -d --force-recreate
