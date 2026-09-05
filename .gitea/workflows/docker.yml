@@ -2,9 +2,10 @@ name: Build & Push Docker Image
 
 on:
   push:
-    branches: [main, develop]
-    tags: ["*"]
-
+    branches:
+      - develop
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -13,13 +14,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set image tag
+      - name: Set image version
         id: tag
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+            echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+            echo "is_tag=true" >> "$GITHUB_OUTPUT"
           else
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            echo "version=nightly" >> "$GITHUB_OUTPUT"
+            echo "is_tag=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Prepare Image Name
@@ -28,6 +31,18 @@ jobs:
           RAW_NAME="${{ vars.REGISTRY_DOMAIN }}/${{ gitea.repository_owner }}/documentation"
           echo "name=${RAW_NAME,,}" >> "$GITHUB_OUTPUT"
           echo "ghcr_name=ghcr.io/lincmox/documentation" >> "$GITHUB_OUTPUT"
+
+      - name: Build image tags
+        id: imagetags
+        run: |
+          echo "tags<<EOF" >> "$GITHUB_OUTPUT"
+          echo "${{ steps.image.outputs.name }}:${{ steps.tag.outputs.version }}" >> "$GITHUB_OUTPUT"
+          echo "${{ steps.image.outputs.ghcr_name }}:${{ steps.tag.outputs.version }}" >> "$GITHUB_OUTPUT"
+          if [[ "${{ steps.tag.outputs.is_tag }}" == "true" ]]; then
+            echo "${{ steps.image.outputs.name }}:latest" >> "$GITHUB_OUTPUT"
+            echo "${{ steps.image.outputs.ghcr_name }}:latest" >> "$GITHUB_OUTPUT"
+          fi
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       # -------------------
       # Build tools
@@ -64,7 +79,4 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ steps.image.outputs.name }}:${{ steps.tag.outputs.tag }}
-            ${{ steps.image.outputs.name }}:0.1.1
-            ${{ steps.image.outputs.ghcr_name }}:${{ steps.tag.outputs.tag }}
+          tags: ${{ steps.imagetags.outputs.tags }}

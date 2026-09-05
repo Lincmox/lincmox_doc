@@ -51,6 +51,47 @@ docker run -p 8080:80 lincmox/docs
 
 Then open [http://localhost:8080](http://localhost:8080).
 
+## CI/CD — Docker deployment
+
+The Docker image is built and pushed automatically by **Gitea Actions**
+(`.gitea/workflows/docker.yml`).
+
+### Workflow triggers
+
+| Event | Image tags |
+|---|---|
+| push on `develop` | `nightly` |
+| tag push (e.g. `v2.0.0`) | `latest` + `v2.0.0` |
+
+### Output
+
+A multi-architecture image (`linux/amd64`, `linux/arm64`) is pushed to **two registries**:
+
+| Registry | Image |
+|---|---|
+| Gitea Container Registry | `${{ vars.REGISTRY_DOMAIN }}/lincmox/documentation:<tag>` |
+| GitHub Container Registry (GHCR) | `ghcr.io/lincmox/documentation:<tag>` |
+
+Both pushes use the same tags (`nightly` on develop, `latest` + version on tag), so the
+documentation can be pulled from either registry.
+
+### Deploying the docs
+
+```bash
+# From GHCR
+docker pull ghcr.io/lincmox/documentation:latest
+docker run -p 8080:80 ghcr.io/lincmox/documentation
+
+# Or from the Gitea registry
+docker pull <REGISTRY_DOMAIN>/lincmox/documentation:latest
+```
+
+To deploy with the bundled compose file:
+
+```bash
+docker compose up -d
+```
+
 ## Editing content
 
 1. Edit or add a Markdown file under `doc/functional/` or `doc/technical/`.
