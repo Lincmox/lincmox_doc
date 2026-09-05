@@ -1,0 +1,327 @@
+openapi: 3.0.3
+info:
+  title: Lincmox REST API
+  version: "2.0.0"
+  description: Complete reference of the REST API exposed by the `lincmoxd` daemon (v2).
+servers:
+  - url: http://localhost:8080
+    description: TCP Server
+tags:
+  - name: LED
+    description: LED control
+  - name: Strip
+    description: LED Strip control
+  - name: Monitors
+    description: Automatic monitors
+  - name: System
+    description: Daemon status and reset
+paths:
+  /api/v1/led/{family}/{action}:
+    post:
+      tags:
+        - LED
+      summary: Control power or network LED
+      parameters:
+        - name: family
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [power, network]
+        - name: action
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [on, off, blink]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                color:
+                  type: string
+                  enum: [white, red, orange]
+                  description: "Required for on/off"
+                blink:
+                  type: boolean
+                  description: "Required for blink"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/led/{family}/{id}/{action}:
+    post:
+      tags:
+        - LED
+      summary: Control a SATA or NVMe LED
+      parameters:
+        - name: family
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [sata, nvme]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            description: "1-2 for sata, 1-4 for nvme"
+        - name: action
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [on, off, blink]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                color:
+                  type: string
+                  enum: [white, red, orange]
+                blink:
+                  type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/strip/animation:
+    post:
+      tags:
+        - Strip
+      summary: Set strip animation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [off, breath, loop]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/strip/brightness:
+    post:
+      tags:
+        - Strip
+      summary: Set strip brightness
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: integer
+                  minimum: 0
+                  maximum: 255
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/strip/color:
+    post:
+      tags:
+        - Strip
+      summary: Set strip color
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                r: {type: integer, minimum: 0, maximum: 255}
+                g: {type: integer, minimum: 0, maximum: 255}
+                b: {type: integer, minimum: 0, maximum: 255}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/strip/loop/{n}/color:
+    post:
+      tags:
+        - Strip
+      summary: Set strip loop color
+      parameters:
+        - name: n
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum: [1, 2]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                r: {type: integer, minimum: 0, maximum: 255}
+                g: {type: integer, minimum: 0, maximum: 255}
+                b: {type: integer, minimum: 0, maximum: 255}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/reset:
+    post:
+      tags:
+        - System
+      summary: Reset LEDs or Strip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [full, leds, strip]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/state:
+    get:
+      tags:
+        - System
+      summary: Get current state of LEDs and Strip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leds:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        color: {type: string}
+                        state: {type: string}
+                  strip:
+                    type: object
+                    properties:
+                      color: {type: string}
+                      anim: {type: string}
+                      brightness: {type: integer}
+                      loop1: {type: string}
+                      loop2: {type: string}
+  /api/v1/status:
+    get:
+      tags:
+        - System
+      summary: Get daemon status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string, example: ok}
+                  device: {type: string}
+                  monitors: {type: object}
+  /api/v1/monitors:
+    get:
+      tags:
+        - Monitors
+      summary: List active monitors
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/monitors/network/enable:
+    post:
+      tags:
+        - Monitors
+      summary: Enable network monitor
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iface: {type: string, default: eth0}
+                interval_ms: {type: integer, default: 500}
+                threshold_bytes: {type: integer, default: 1024}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/v1/monitors/network/disable:
+    post:
+      tags:
+        - Monitors
+      summary: Disable network monitor
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+

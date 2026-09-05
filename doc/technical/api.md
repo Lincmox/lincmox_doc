@@ -34,6 +34,7 @@ POST /api/v1/strip/brightness            {"value": int}
 POST /api/v1/strip/color                 {"r": int, "g": int, "b": int}
 POST /api/v1/strip/loop/{n}/color        {"r": int, "g": int, "b": int}
 POST /api/v1/reset                       {"mode": "full|leds|strip"}
+GET  /api/v1/state
 GET  /api/v1/status
 GET  /api/v1/monitors
 POST /api/v1/monitors/network/enable     {"iface", "interval_ms", "threshold_bytes"}
@@ -140,7 +141,33 @@ Valid modes: `full`, `leds`, `strip`.
 
 ---
 
-## Status
+## Status and State
+
+### `GET /api/v1/state`
+
+Returns the current state of all LEDs and the LED strip configuration.
+
+```bash
+curl --unix-socket /run/lincmoxd.sock http://lincmoxd/api/v1/state
+```
+
+```json
+{
+  "leds": {
+    "network": {
+      "color": "white",
+      "state": "off"
+    }
+  },
+  "strip": {
+    "color": "#ff0000",
+    "anim": "off",
+    "brightness": 128,
+    "loop1": "#00ff00",
+    "loop2": "#0000ff"
+  }
+}
+```
 
 ### `GET /api/v1/status`
 

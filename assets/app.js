@@ -337,6 +337,61 @@ async function loadPage(filePath) {
   contentEl.innerHTML = '<p class="loading-message">Loading...</p>';
   document.getElementById('toc-nav').innerHTML = '';
 
+  // Check if we need to render the interactive Swagger UI
+  if (filePath === 'doc/technical/api.md') {
+    contentEl.innerHTML = '<div id="swagger-ui"></div>';
+    
+    // We adjust theme based on current mode
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    SwaggerUIBundle({
+      url: "assets/swagger.yaml",
+      dom_id: '#swagger-ui',
+      deepLinking: false, // disabled to not conflict with the SPA router
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIBundle.SwaggerUIStandalonePreset
+      ],
+      layout: "BaseLayout",
+      onComplete: () => {
+        // Build TOC from Swagger tags once it's rendered
+        const tocNav = document.getElementById('toc-nav');
+        tocNav.innerHTML = '';
+        
+        const tags = ['LED', 'Strip', 'System', 'Monitors'];
+        const tagElements = [];
+        
+        tags.forEach(tag => {
+          const id = `operations-tag-${tag}`;
+          const link = document.createElement('a');
+          link.href = `#${id}`;
+          link.className = 'toc-link';
+          link.textContent = tag;
+          
+          link.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.getElementById(id);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
+          tocNav.appendChild(link);
+          
+          // Collect elements for TOC highlight
+          const target = document.getElementById(id);
+          if (target) tagElements.push(target);
+        });
+        
+        // Highlight active section on scroll
+        observeTOCHighlight(tagElements);
+      }
+    });
+    
+    window.scrollTo(0, 0);
+    injectPrevNextButtons(filePath);
+    return;
+  }
+
   try {
     const res = await fetch(filePath);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

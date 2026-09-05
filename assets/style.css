@@ -86,7 +86,6 @@ a:hover { text-decoration: underline; }
   right: 0;
   height: var(--header-height);
   background: var(--color-header-bg);
-  border-top: 3px solid var(--color-primary);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -568,15 +567,14 @@ a:hover { text-decoration: underline; }
 }
 
 /* Code blocks */
-.doc-body pre {
+.doc-body pre:not(#swagger-ui pre) {
   background: var(--color-pre-bg);
-  border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
   overflow-x: auto;
   margin: 0 0 1.25rem;
   position: relative;
 }
-.doc-body pre code {
+.doc-body pre:not(#swagger-ui pre) code {
   background: none;
   border: none;
   padding: 0;
@@ -1010,4 +1008,18 @@ a:hover { text-decoration: underline; }
   font-size: 1rem;
   color: var(--color-primary);
   font-weight: 600;
+}
+
+/* =============================================
+   SWAGGER UI DARK THEME FIX
+   ============================================= */
+#swagger-ui {
+  background-color: #ffffff;
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+[data-theme="dark"] #swagger-ui {
+  /* Invert all colors, then rotate hue 180deg to restore color tones (greens, blues, reds) */
+  filter: invert(92%) hue-rotate(180deg);
 }
