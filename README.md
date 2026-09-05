@@ -62,12 +62,12 @@ static site into an nginx image and publishes it.
 
 | Event | Image version tag | `latest` also pushed? |
 |---|---|---|
-| push on `develop` | `nightly` | no |
+| push on `dev` | `nightly` | no |
 | tag push — **any tag** (e.g. `v2.0.0`, `1.2.3`, `2026.09`) | the tag name, without any `v` prefix stripping | yes |
 
 > Tags are used verbatim as the image version. There is **no `v` prefix requirement**:
 > `v2.0.0` → tag `v2.0.0`; `1.2.3` → tag `1.2.3`. Pushing a tag always also pushes a
-> `latest` tag; pushing to `develop` only pushes `nightly`.
+> `latest` tag; pushing to `dev` only pushes `nightly`.
 
 ### What the workflow does
 
@@ -79,7 +79,7 @@ static site into an nginx image and publishes it.
    (lowercased), GHCR image is `ghcr.io/lincmox/documentation`.
 4. **Assemble the tags** (`id: imagetags`):
    - tag push → `<image>:<tag>` + `:latest` on both registries.
-   - develop push → only `<image>:nightly`.
+   - dev push → only `<image>:nightly`.
 5. **Set up QEMU + Docker Buildx** for multi-architecture builds.
 6. **Login** to the Gitea Container Registry (actor + `ACCESS_TOKEN`) and to
    GitHub Container Registry (`GHCR_USERNAME` + `GHCR_TOKEN`).
@@ -95,7 +95,7 @@ A multi-architecture image (`linux/amd64`, `linux/arm64`) is pushed to **two reg
 | Gitea Container Registry | `${{ vars.REGISTRY_DOMAIN }}/<owner>/documentation:<tag>` |
 | GitHub Container Registry (GHCR) | `ghcr.io/lincmox/documentation:<tag>` |
 
-Both pushes use the same tags (`nightly` on `develop`, `latest` + version on tag), so the
+Both pushes use the same tags (`nightly` on `dev`, `latest` + version on tag), so the
 documentation can be pulled from either registry.
 
 ### Required variables & secrets
