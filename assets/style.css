@@ -312,6 +312,14 @@ a:hover { text-decoration: underline; }
   margin-right: 0;
 }
 
+/* Vanta.js animated background (landing page only) */
+#vanta-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
 /* =============================================
    SIDEBAR
    ============================================= */

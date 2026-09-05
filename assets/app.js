@@ -9,6 +9,7 @@
  *  - Full-text search (in-memory index)
  *  - Auto-generated Table of Contents
  *  - Light / Dark theme toggle (localStorage)
+ *  - Vanta.js animated LED-matrix background (landing page)
  */
 
 /* =============================================
@@ -18,6 +19,7 @@ let config = null;
 let currentSection = 'functional';
 let searchIndex = [];  // [{ path, section, title, content }]
 let searchIndexBuilt = false;
+let vantaEffect = null;
 
 /* =============================================
    INIT
@@ -103,6 +105,45 @@ function setTheme(theme) {
   const logo = document.getElementById('logo');
   if (logo) {
     logo.src = theme === 'dark' ? 'assets/logo-dark.jpg' : 'assets/logo.jpg';
+  }
+  // Restart Vanta with the new theme's palette while it is active
+  if (vantaEffect) {
+    stopVanta();
+    startVanta();
+  }
+}
+
+/* =============================================
+   VANTA BACKGROUND (landing page only)
+   ============================================= */
+function vantaConfig() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    el: '#vanta-bg',
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    scale: 1.0,
+    scaleMobile: 1.0,
+    // LED-matrix vibe (echoes the LincStation N1 LED strip)
+    showLines: false,
+    size: 1.7,
+    spacing: 12.0,
+    color: dark ? 0xf08c1f : 0xe47404,        // brand accent
+    backgroundColor: dark ? 0x0b1120 : 0xffffff,
+  };
+}
+
+function startVanta() {
+  const bg = document.getElementById('vanta-bg');
+  if (vantaEffect || !window.VANTA || !bg) return;
+  vantaEffect = VANTA.DOTS(vantaConfig());
+}
+
+function stopVanta() {
+  if (vantaEffect) {
+    vantaEffect.destroy();
+    vantaEffect = null;
   }
 }
 
@@ -258,6 +299,7 @@ function handleRoute() {
       document.body.classList.add('landing');
       document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('sidebar-nav').innerHTML = '';
+      startVanta();
       loadPage('doc/home.md');
     } else {
       // Fallback
@@ -267,6 +309,7 @@ function handleRoute() {
   }
 
   document.body.classList.remove('landing');
+  stopVanta();
   const [, section, path] = match;
 
   // If section changed, update the section toggle
