@@ -120,15 +120,15 @@ function vantaConfig() {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
   return {
     el: '#vanta-bg',
-    mouseControls: true,
-    touchControls: true,
+    mouseControls: false,
+    touchControls: false,
     gyroControls: false,
     scale: 1.0,
     scaleMobile: 1.0,
     // LED-matrix vibe (echoes the LincStation N1 LED strip)
     showLines: false,
-    size: 1.7,
-    spacing: 12.0,
+    size: 4.5,
+    spacing: 16.0,
     color: dark ? 0xf08c1f : 0xe47404,        // brand accent
     backgroundColor: dark ? 0x0b1120 : 0xffffff,
   };

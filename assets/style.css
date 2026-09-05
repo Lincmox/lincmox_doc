@@ -311,6 +311,22 @@ a:hover { text-decoration: underline; }
   margin-right: 0;
 }
 
+/* Glassmorphism card for landing page content */
+.landing .doc-body {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  max-width: 760px;
+  margin: 2rem auto;
+}
+[data-theme="dark"] .landing .doc-body {
+  background: rgba(11, 17, 32, 0.35);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 /* Vanta.js animated background (landing page only) */
 #vanta-bg {
   position: fixed;
