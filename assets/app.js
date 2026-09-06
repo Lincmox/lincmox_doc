@@ -324,8 +324,11 @@ function handleRoute() {
       document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('sidebar-nav').innerHTML = '';
       startVanta();
-      if (landingHTML) {
-        document.getElementById('doc-content').innerHTML = landingHTML;
+      // Restore the inline landing HTML. Only re-render when returning from a
+      // doc page: this avoids recreating the demo iframe (and reloading it).
+      const contentEl = document.getElementById('doc-content');
+      if (landingHTML && contentEl.innerHTML !== landingHTML) {
+        contentEl.innerHTML = landingHTML;
       }
     } else {
       // Fallback

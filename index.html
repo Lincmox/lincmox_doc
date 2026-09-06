@@ -77,15 +77,41 @@
     <!-- ===== MAIN CONTENT ===== -->
     <main class="main-content">
       <article id="doc-content" class="doc-body" data-prerendered="true">
-        <div align="center">
-          <img src="assets/logo_light.png" alt="Lincmox logo" width="520" />
-          <h1>Welcome to the Lincmox documentation</h1>
-          <p>Find here all the functional and technical documentation of the project.</p>
-          <br/>
-          <a href="#/functional/functional/index.md" style="display: inline-block; padding: 10px 20px; background: var(--color-primary); color: white; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px;">Access the documentation</a>
-        </div>
-        <hr/>
-        <p><strong>Lincmox</strong> is an open-source project that brings full control of the status LEDs and front LED strip of the <a href="https://www.lincplustech.com/fr-fr/products/lincstation-n1-network-attached-storage"><strong>LincPlus LincStation N1</strong></a> when the machine runs <a href="https://www.proxmox.com/en/products/proxmox-virtual-environment/overview"><strong>Proxmox VE</strong></a>.</p>
+        <section class="landing-hero">
+          <div class="hero-copy">
+            <img src="assets/logo.jpg" alt="Lincmox logo" class="hero-logo" />
+            <h1>Control the LEDs of your <span class="hero-accent">LincStation&nbsp;N1</span> under Proxmox</h1>
+            <p class="hero-tagline">
+              Lincmox brings full control of the status LEDs and the front LED strip of the
+              <a href="https://www.lincplustech.com/fr-fr/products/lincstation-n1-network-attached-storage" target="_blank" rel="noopener">LincPlus LincStation&nbsp;N1</a>
+              when the machine runs
+              <a href="https://www.proxmox.com/en/products/proxmox-virtual-environment/overview" target="_blank" rel="noopener">Proxmox VE</a>.
+            </p>
+            <ul class="hero-features">
+              <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="3"/><circle cx="12" cy="12" r="3"/><circle cx="19" cy="12" r="3"/></svg>Full control of every status LED: power, SATA, NVMe and network</li>
+              <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="9" width="18" height="6" rx="2"/></svg>Front LED strip: pick colors and brightness like on the real device</li>
+              <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Automatic blink: monitor network traffic and light up on activity</li>
+              <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Three surfaces: embedded Web UI, CLI and REST API</li>
+            </ul>
+            <div class="hero-cta">
+              <a href="#/functional/functional/index.md" class="btn btn-primary">GET STARTED !</a>
+              <a href="#/functional/functional/demo.md" class="btn btn-outline">Open the live demo</a>
+            </div>
+            <p class="hero-oss">Open source &middot; I2C protocol &middot; simulation mode</p>
+          </div>
+
+          <div class="hero-demo">
+            <div class="hero-browser">
+              <div class="hero-browser-bar">
+                <span class="hero-browser-dot red"></span>
+                <span class="hero-browser-dot yellow"></span>
+                <span class="hero-browser-dot green"></span>
+                <span class="hero-browser-url">https://lincmox.local:8080/</span>
+              </div>
+              <iframe src="assets/demo.html" loading="lazy" class="hero-demo-frame" title="Lincmox interactive demo"></iframe>
+            </div>
+          </div>
+        </section>
       </article>
     </main>
 
