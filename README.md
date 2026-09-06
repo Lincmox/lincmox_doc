@@ -14,7 +14,7 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
 ## Project structure
 
 ```
-├── index.html          # Single HTML shell (SPA)
+├── index.html          # Single HTML shell (SPA) + inlined landing page
 ├── config.json         # Site title, logo and navigation configuration
 ├── assets/
 │   ├── app.js          # JS logic (routing, Markdown, search, TOC, theme)
@@ -22,18 +22,19 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
 │   ├── logo.png        # Site logo
 │   └── img/            # Screenshots and figures used by the docs
 ├── doc/
-│   ├── home.md         # Landing page (shown on #/)
 │   ├── functional/     # Functional documentation (user guide)
 │   └── technical/      # Technical documentation (reference)
 ```
 
-The content lives entirely in **Markdown** files under `doc/`. The navigation is driven
-by `config.json`. There is no build step: the `index.html` shell fetches the Markdown
-files and renders them client-side with `marked.js`.
+The documentation content lives in **Markdown** files under `doc/`, except the
+landing page which is **inlined directly in `index.html`** (rendered on `#/`) so it
+loads instantly, without any network request or flash of the navigation. The
+navigation is driven by `config.json`. There is no build step: the `index.html`
+shell fetches the Markdown files and renders them client-side with `marked.js`.
 
 ## Features
 
-- **Landing page** at `#/` (served by `doc/home.md`)
+- **Landing page** at `#/` (inlined in `index.html`, renders instantly)
 - **Previous / Next** navigation buttons at the bottom of each page
 - **Full-text search** over all pages
 - **Light / Dark** theme toggle (persisted in `localStorage`)

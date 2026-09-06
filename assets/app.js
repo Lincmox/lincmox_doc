@@ -20,6 +20,7 @@ let currentSection = 'functional';
 let searchIndex = [];  // [{ path, section, title, content }]
 let searchIndexBuilt = false;
 let vantaEffect = null;
+let landingHTML = '';  // Snapshot of the landing page HTML (inlined in index.html)
 
 /* =============================================
    INIT
@@ -45,14 +46,29 @@ async function init() {
   const savedTheme = localStorage.getItem('theme') || 'light';
   setTheme(savedTheme);
 
+  // Snapshot the landing page HTML (it is pre-rendered inline in index.html so
+  // it displays instantly, before any JS runs). We keep a copy to restore it
+  // when the user navigates back from a doc page.
+  const contentEl = document.getElementById('doc-content');
+  if (contentEl.dataset.prerendered === 'true') {
+    landingHTML = contentEl.innerHTML;
+  }
+
   // Setup UI interactions
   setupThemeToggle();
   setupSearch();
   setupSectionToggle();
   setupMobileUI();
 
-  // Build nav and route to initial page
-  buildNav(currentSection);
+  // Determine the initial route BEFORE building the navigation so the sidebar
+  // is never rendered (even briefly) on the landing page.
+  const initialHash = window.location.hash;
+  const isLanding = !initialHash || initialHash === '#' || initialHash === '#/';
+  if (!isLanding) {
+    buildNav(currentSection);
+  }
+
+  // Route to the initial page
   handleRoute();
 
   // Listen for hash changes
@@ -302,13 +318,15 @@ function handleRoute() {
 
   if (!match) {
     if (!hash || hash === '#/' || hash === '#') {
-      // Landing page
+      // Landing page — content is already inlined in index.html for instant load
       currentSection = null;
       document.body.classList.add('landing');
       document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('sidebar-nav').innerHTML = '';
       startVanta();
-      loadPage('doc/home.md');
+      if (landingHTML) {
+        document.getElementById('doc-content').innerHTML = landingHTML;
+      }
     } else {
       // Fallback
       window.location.hash = '#/';
@@ -342,14 +360,6 @@ function navigateTo(section, path) {
    ============================================= */
 async function loadPage(filePath) {
   const contentEl = document.getElementById('doc-content');
-  
-  // If we are on the landing page and it's already pre-rendered, skip fetch
-  if (filePath === 'doc/home.md' && contentEl.dataset.prerendered === "true") {
-    // Just remove the flag for future navigations so it acts normally
-    contentEl.dataset.prerendered = "false";
-    return;
-  }
-
   contentEl.innerHTML = '<p class="loading-message">Loading...</p>';
   document.getElementById('toc-nav').innerHTML = '';
 
